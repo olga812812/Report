@@ -16,6 +16,7 @@ public class AdfoxData {
 	String reportCommonURL="https://login.adfox.ru/commonReportsOutputForm.php?loginAccount="+login+"&loginPassword="+com.getHashCode(pwd);
 	String urlBannerInfo = "&object=account&action=list&actionObject=banner&actionObjectID=2031551";
 	String urlCampaignInfo= "&object=account&action=list&actionObject=campaign&superCampaignID=41601";
+	String urlAllCampaigns = "&object=account&action=list&actionObject=campaign";
 	String urlFlightTargetingInfo = "&object=campaign&action=info&actionObject=targeting&objectID=";
 	String urlFlightPlacementInfo = "&object=campaign&action=info&actionObject=placement2&dataType=campaignSites&isOn=on&objectID=";
 	
@@ -27,6 +28,11 @@ public class AdfoxData {
 		return apiCommonURL;
 	}
 	
+	public String getAllCampaignUrl() {
+		return urlAllCampaigns;
+	}
+	
+
 	
 	public ArrayList<String> getCampaignFlights()
 	{

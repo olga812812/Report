@@ -5,7 +5,7 @@ public class ReportMain {
 	
 	public static void createReport(String reportName) {
 		// TODO Auto-generated method stub
-		GeneralReport report;
+		GeneralReport report;		
 		
 		switch (reportName){
 		case "TVM":        report=new  ReportTVM();
