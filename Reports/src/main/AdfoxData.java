@@ -16,6 +16,7 @@ public class AdfoxData {
 	String reportCommonURL="https://login.adfox.ru/commonReportsOutputForm.php?loginAccount="+login+"&loginPassword="+com.getHashCode(pwd);
 	String urlBannerInfo = "&object=account&action=list&actionObject=banner&actionObjectID=2031551";
 	String urlCampaignInfo= "&object=account&action=list&actionObject=campaign&superCampaignID=41601";
+	String urlSuperCampaignInfo= "&object=account&action=list&actionObject=superCampaign&actionObjectID=";
 	String urlAllCampaigns = "&object=account&action=list&actionObject=campaign";
 	String urlFlightTargetingInfo = "&object=campaign&action=info&actionObject=targeting&objectID=";
 	String urlFlightPlacementInfo = "&object=campaign&action=info&actionObject=placement2&dataType=campaignSites&isOn=on&objectID=";
@@ -32,6 +33,10 @@ public class AdfoxData {
 		return urlAllCampaigns;
 	}
 	
+	public String getSuperCampaignInfoUrl() {
+		return urlSuperCampaignInfo;
+	}
+	
 
 	
 	public ArrayList<String> getCampaignFlights()
@@ -42,7 +47,7 @@ public class AdfoxData {
 		int totalRows  = Integer.parseInt(domPars.getTagValue(response, "total_rows"));
 		int rowsOnFirstPage  = Integer.parseInt(domPars.getTagValue(response, "rows"));
 		
-		com.closeConn(connection);
+		com.closeConnection(connection);
 		
 		for (int i=0; i<totalRows; i=i+rowsOnFirstPage)
 		{
@@ -52,7 +57,7 @@ public class AdfoxData {
 			connection = com.makeHttpRequest(apiCommonURL+urlCampaignInfo+"&offset="+i);
 			response = com.getResponse(connection);
 			flights.addAll(domPars.getSeveralTagValues(response, "ID"));
-			com.closeConn(connection);
+			com.closeConnection(connection);
 			}
 		}
 		
@@ -73,7 +78,7 @@ public class AdfoxData {
 			connection = com.makeHttpRequest(apiCommonURL+urlFlightTargetingInfo+flights.get(i));
 			response = com.getResponse(connection);
 			mapFlightsIPTargeting.put(flights.get(i), domPars.getNextTagValueByTextInTag(response, "name", "ips", "description"));
-			com.closeConn(connection);
+			com.closeConnection(connection);
 		}
 		
 		System.out.println(mapFlightsIPTargeting);
@@ -92,7 +97,7 @@ public class AdfoxData {
 					connection = com.makeHttpRequest(apiCommonURL+urlFlightPlacementInfo+flights.get(i));
 					response = com.getResponse(connection);
 					mapFlightsPlacementTargeting.put(flights.get(i), domPars.getSeveralTagValues(response, "websiteName"));
-					com.closeConn(connection);
+					com.closeConnection(connection);
 				}
 				
 				System.out.println(mapFlightsPlacementTargeting);

@@ -57,7 +57,7 @@ public class ReportSomeReport implements GeneralReport{
 		String response = com.getResponse(connection);
 		System.out.println("From DOM campaignID is: "+domPars.getTagValue(response, "campaignID"));
 		System.out.println("From SAX campaignID is: "+saxPars.getTagValue(response, "campaignID"));
-		com.closeConn(connection);
+		com.closeConnection(connection);
 		
 		ArrayList<String> flights = new ArrayList<String>();
 		flights = aD.getCampaignFlights();

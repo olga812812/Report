@@ -68,7 +68,7 @@ public class Common {
 		}
 	}
 	
-	public void closeConn (HttpURLConnection conn)
+	public void closeConnection (HttpURLConnection conn)
 	{
 		conn.disconnect();
 	}

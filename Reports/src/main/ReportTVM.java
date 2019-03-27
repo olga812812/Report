@@ -55,10 +55,10 @@ public class ReportTVM implements GeneralReport {
 		
 		conn = com.makeHttpRequest(adfox.getReportCommonURL()+getReportTVMUrl(1));
 		String reportYesterday = com.getResponse(conn);
-		com.closeConn(conn);
+		com.closeConnection(conn);
 		conn = com.makeHttpRequest(adfox.getReportCommonURL()+getReportTVMUrl(2));
 		String reportDayBeforeYesterday = com.getResponse(conn);
-		com.closeConn(conn);
+		com.closeConnection(conn);
 		sitesFromReportYesterday=domPars.getSeveralTagValues(reportYesterday, "criteria");
 		sitesFromReportDayBeforeYesterday=domPars.getSeveralTagValues(reportDayBeforeYesterday, "criteria");
 		mapYesterday=getImprForEachSite(sitesFromReportYesterday, reportYesterday);
