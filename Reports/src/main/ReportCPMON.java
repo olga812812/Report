@@ -1,6 +1,7 @@
 package main;
 
 import java.net.HttpURLConnection;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ public class ReportCPMON implements GeneralReport{
 	Integer priorityBorder = Integer.valueOf(com.loadProperties().getProperty("priority"));
 	List<String> assistants = Arrays.asList(assistantsArray);
 	HashSet<String> superCampaignIdSet = new HashSet<>();
+	ArrayList<String> activeSuperCampaigns = new ArrayList<>();
 	int numberOfFlightOnPage=100;
 	String getAllCampaingsUrl = adfox.getApiCommonURL()+adfox.getAllCampaignUrl()+"&limit="+numberOfFlightOnPage;
 	String getSuperCampaignInfoUrl = adfox.getApiCommonURL()+adfox.getSuperCampaignInfoUrl();
@@ -36,13 +38,15 @@ public class ReportCPMON implements GeneralReport{
 	@Override
 	public void startReport() {
 		// TODO Auto-generated method stub		
+		System.out.println("Start report: "+LocalTime.now());
 		System.out.println(getAllCampaingsUrl);
-		System.out.println(assistants);
+		System.out.println(assistants);		
 		makeConnectionAndGetResponce(getAllCampaingsUrl);	
 		com.closeConnection(connection);
 		int totalFlights  = Integer.parseInt(domPars.getTagValue(response, "total_rows"));		
 		System.out.println(totalFlights);
-		
+		LocalTime  startTime= LocalTime.now();
+		System.out.println("Start get flights: "+ startTime);
 		for(int i=0; i<totalFlights; i=i+numberOfFlightOnPage){			
 			makeConnectionAndGetResponce(getAllCampaingsUrl+"&offset="+i);	
 			com.closeConnection(connection);
@@ -65,20 +69,26 @@ public class ReportCPMON implements GeneralReport{
 					
 				}
 				
-			}
+			}			
 			System.out.println(allFlights);
 			System.out.println(superCampaignIdSet);						
 			
 		}
+		System.out.println("Start get flights "+startTime+" End get flights: "+LocalTime.now());
 		
 		for (String superCampaignID: superCampaignIdSet) {
 			makeConnectionAndGetResponce(getSuperCampaignInfoUrl+superCampaignID);	
 			com.closeConnection(connection);
 			String superCampaignStatus=domPars.getNextTagValueByTextInTag(response, "ID", superCampaignID, "status");	
-			if (superCampaignStatus.equals("0")) superCampaignIdSet.remove(superCampaignID);
+			if (superCampaignStatus.equals("0")) activeSuperCampaigns.add(superCampaignID);
 		}
 		
 		System.out.println(superCampaignIdSet);
+		
+		for(String flightId: allFlights.keySet()) {
+			if (activeSuperCampaigns.contains((allFlights.get(flightId)).get(0))) System.out.println(flightId+" and info "+allFlights.get(flightId));
+		}
+		
 		
 		
 		
