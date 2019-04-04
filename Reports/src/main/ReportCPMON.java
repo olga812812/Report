@@ -100,7 +100,7 @@ public class ReportCPMON implements GeneralReport{
 		}
 	}
 	
-	private void getFlightWithActiveSuperCampaign(){
+	private void getFlightsWithActiveSuperCampaign(){
 		for(String flightId: allFlights.keySet()) {
 			if (activeSuperCampaigns.contains((allFlights.get(flightId)).get(0))) print(flightId+" and info "+allFlights.get(flightId));
 		}
@@ -118,7 +118,7 @@ public class ReportCPMON implements GeneralReport{
 		print("Start get flights "+startGettingAllFlightsTime+" End get flights: "+getNowTime());
 		getActiveSuperCampaigns();		
 		print(superCampaignIdSet);
-		getFlightWithActiveSuperCampaign();
+		getFlightsWithActiveSuperCampaign();
 		
 	}
 
