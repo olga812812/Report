@@ -12,20 +12,38 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 public class ReportCPMON implements GeneralReport{
-	Common com = new Common();
-	HttpURLConnection connection;
-	String response;
-	DomParser domPars = new DomParser();
-	ArrayList<String> flightsOnOnePage;
-	Map<String, ArrayList<String>> allFlights=new HashMap<>();
-	String[] assistantsArray = com.loadProperties().getProperty("assistants").split(",");
-	Integer priorityBorder = Integer.valueOf(com.loadProperties().getProperty("priority"));
-	List<String> assistants = Arrays.asList(assistantsArray);
-	HashSet<String> superCampaignIdSet = new HashSet<>();
-	ArrayList<String> activeSuperCampaigns = new ArrayList<>();
-	int numberOfFlightOnPage=100;
-	String getAllCampaingsUrl = adfox.getApiCommonURL()+adfox.getAllCampaignUrl()+"&limit="+numberOfFlightOnPage;
-	String getSuperCampaignInfoUrl = adfox.getApiCommonURL()+adfox.getSuperCampaignInfoUrl();
+	private Common com = new Common();
+	private HttpURLConnection connection;
+	private String response;
+	private int totalFlights;
+	private LocalTime  startGettingAllFlightsTime;
+	private DomParser domPars = new DomParser();
+	private ArrayList<String> flightsOnOnePage;
+	private Map<String, ArrayList<String>> allFlights=new HashMap<>();
+	private String[] assistantsArray = com.loadProperties().getProperty("assistants").split(",");
+	private Integer priorityBorder = Integer.valueOf(com.loadProperties().getProperty("priority"));
+	private List<String> assistants = Arrays.asList(assistantsArray);
+	private HashSet<String> superCampaignIdSet = new HashSet<>();
+	private ArrayList<String> activeSuperCampaigns = new ArrayList<>();
+	private int numberOfFlightOnPage=100;
+	private String getAllCampaingsUrl = adfox.getApiCommonURL()+adfox.getAllCampaignUrl()+"&limit="+numberOfFlightOnPage;
+	private String getSuperCampaignInfoUrl = adfox.getApiCommonURL()+adfox.getSuperCampaignInfoUrl();
+	
+	private void print(Object str) {
+		com.print(str);
+	}
+	
+	private LocalTime getNowTime(){
+		return LocalTime.now();
+	}
+	
+	private void getTotalNumberOfFlights() {
+		makeConnectionAndGetResponce(getAllCampaingsUrl);	
+		closeConnection();
+		totalFlights  = Integer.parseInt(domPars.getTagValue(response, "total_rows"));		
+		print(totalFlights);
+		
+	}
 	
 	private void makeConnectionAndGetResponce(String url){
 		System.out.println(url);
@@ -34,23 +52,20 @@ public class ReportCPMON implements GeneralReport{
 		response=com.getResponse(connection);
 		
 	}
-
-	@Override
-	public void startReport() {
-		// TODO Auto-generated method stub		
-		System.out.println("Start report: "+LocalTime.now());
-		System.out.println(getAllCampaingsUrl);
-		System.out.println(assistants);		
-		makeConnectionAndGetResponce(getAllCampaingsUrl);	
+	
+	private void closeConnection(){
 		com.closeConnection(connection);
-		int totalFlights  = Integer.parseInt(domPars.getTagValue(response, "total_rows"));		
-		System.out.println(totalFlights);
-		LocalTime  startTime= LocalTime.now();
-		System.out.println("Start get flights: "+ startTime);
+	}
+	
+	private void setStartTimeOfGettingAllFlights() {
+		startGettingAllFlightsTime=getNowTime();
+	}
+	
+	private void getActiveFlightsWithNeededPriorityAndAssistant(){
 		for(int i=0; i<totalFlights; i=i+numberOfFlightOnPage){			
 			makeConnectionAndGetResponce(getAllCampaingsUrl+"&offset="+i);	
-			com.closeConnection(connection);
-			System.out.println("i="+i);
+			closeConnection();
+			print("i="+i);
 			flightsOnOnePage=domPars.getSeveralTagValues(response, "ID");
 			for (String flightID: flightsOnOnePage) {
 				String flightStatus=domPars.getNextTagValueByTextInTag(response, "ID", flightID, "status");	
@@ -63,34 +78,47 @@ public class ReportCPMON implements GeneralReport{
 					flightInfo.add(superCampaignID);
 					flightInfo.add(flightAssistantID);
 					flightInfo.add(flightPriority.toString());						
-					System.out.println(superCampaignID+" "+flightAssistantID+" "+flightPriority);
+					print(superCampaignID+" "+flightAssistantID+" "+flightPriority);
 					allFlights.put(flightID, flightInfo);
 					superCampaignIdSet.add(superCampaignID);
 					
 				}
 				
 			}			
-			System.out.println(allFlights);
-			System.out.println(superCampaignIdSet);						
+			print(allFlights);
+			print(superCampaignIdSet);						
 			
 		}
-		System.out.println("Start get flights "+startTime+" End get flights: "+LocalTime.now());
-		
+	}
+	
+	private void getActiveSuperCampaigns(){
 		for (String superCampaignID: superCampaignIdSet) {
 			makeConnectionAndGetResponce(getSuperCampaignInfoUrl+superCampaignID);	
-			com.closeConnection(connection);
+			closeConnection();
 			String superCampaignStatus=domPars.getNextTagValueByTextInTag(response, "ID", superCampaignID, "status");	
 			if (superCampaignStatus.equals("0")) activeSuperCampaigns.add(superCampaignID);
 		}
-		
-		System.out.println(superCampaignIdSet);
-		
+	}
+	
+	private void getFlightWithActiveSuperCampaign(){
 		for(String flightId: allFlights.keySet()) {
-			if (activeSuperCampaigns.contains((allFlights.get(flightId)).get(0))) System.out.println(flightId+" and info "+allFlights.get(flightId));
+			if (activeSuperCampaigns.contains((allFlights.get(flightId)).get(0))) print(flightId+" and info "+allFlights.get(flightId));
 		}
-		
-		
-		
+	}
+
+	@Override
+	public void startReport() {
+		// TODO Auto-generated method stub		
+		print("Start report: "+getNowTime());
+		print("Report url: "+getAllCampaingsUrl);
+		print("Assistants from property file: "+assistants);	
+		getTotalNumberOfFlights();		
+		setStartTimeOfGettingAllFlights();		
+		getActiveFlightsWithNeededPriorityAndAssistant();
+		print("Start get flights "+startGettingAllFlightsTime+" End get flights: "+getNowTime());
+		getActiveSuperCampaigns();		
+		print(superCampaignIdSet);
+		getFlightWithActiveSuperCampaign();
 		
 	}
 

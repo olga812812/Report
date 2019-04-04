@@ -82,4 +82,7 @@ public class Common {
 		return properties;
 	}
 
+	public void print(Object str) {
+		System.out.println(str);
+	}
 }
